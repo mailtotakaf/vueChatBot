@@ -1,16 +1,19 @@
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios' // axiosをインポート
 
 // メッセージのリスト（初期データ）
-const messages = ref([
-  { id: 1, text: 'こんにちは！何かお手伝いしましょうか？', isBot: true },
-])
+const messages = ref([{ id: 1, text: '本物のAIに繋がりました！何でも聞いてください。', isBot: true }])
 
 // 入力中のテキスト
 const inputText = ref('')
 
+// --- Difyの設定 ---
+const DIFY_API_KEY = import.meta.env.VITE_DIFY_API_KEY
+const DIFY_API_URL = 'https://api.dify.ai/v1/chat-messages'
+
 // 送信ボタンを押した時の処理
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!inputText.value.trim()) return
 
   const userText = inputText.value
@@ -22,18 +25,38 @@ const sendMessage = () => {
     text: userText,
     isBot: false
   })
+  inputText.value = ''
 
-  // 2. AIの返答（仮）
-  setTimeout(() => {
+  // 2. AIの返答
+  try {
+    // Dify APIにリクエストを送る
+    const response = await axios.post(DIFY_API_URL, {
+      inputs: {},
+      query: userText,
+      response_mode: "blocking",
+      user: "abc-123", // ユーザー識別用（適当でOK）
+    }, {
+      headers: {
+        'Authorization': `Bearer ${DIFY_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    // AIの返答を画面に追加
     messages.value.push({
       id: Date.now() + 1,
-      text: '「' + userText + '」って言いましたね！',
+      text: response.data.answer,
       isBot: true
     })
-  }, 1000)
 
-  // 入力欄を空にする
-  inputText.value = ''
+  } catch (error) {
+    console.error('エラーが出ちゃいました:', error)
+    messages.value.push({
+      id: Date.now() + 1,
+      text: 'ごめんなさい、接続エラーです...',
+      isBot: true
+    })
+  }
 }
 </script>
 
@@ -48,11 +71,7 @@ const sendMessage = () => {
     </div>
 
     <div class="input-area">
-      <input 
-        v-model="inputText" 
-        @keyup.enter="sendMessage" 
-        placeholder="メッセージを入力..."
-      />
+      <input v-model="inputText" @keyup.enter="sendMessage" placeholder="メッセージを入力..." />
       <button @click="sendMessage">送信</button>
     </div>
   </div>
@@ -71,7 +90,8 @@ const sendMessage = () => {
 
 header {
   padding: 15px;
-  background: #42b983; /* Vueカラー */
+  background: #42b983;
+  /* Vueカラー */
   color: white;
   text-align: center;
   font-weight: bold;
@@ -90,8 +110,13 @@ header {
   display: flex;
 }
 
-.message.user { justify-content: flex-end; }
-.message.bot { justify-content: flex-start; }
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.bot {
+  justify-content: flex-start;
+}
 
 .bubble {
   max-width: 70%;
