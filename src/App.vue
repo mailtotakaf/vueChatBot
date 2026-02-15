@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import axios from 'axios' // axiosをインポート
 
 // メッセージのリスト（初期データ）
@@ -58,6 +58,19 @@ const sendMessage = async () => {
     })
   }
 }
+
+const textareaRef = ref(null)
+
+// 文字数に合わせて高さを変える
+watch(inputText, () => {
+  nextTick(() => {
+    const el = textareaRef.value
+    if (el) {
+      el.style.height = 'auto'
+      el.style.height = el.scrollHeight + 'px'
+    }
+  })
+})
 </script>
 
 <template>
@@ -72,14 +85,9 @@ const sendMessage = async () => {
 
     <div class="input-area">
       <!-- <input v-model="inputText" @keyup.enter="sendMessage" placeholder="メッセージを入力..." /> -->
-      <textarea 
-        v-model="inputText" 
-        @keydown.enter.exact.prevent="sendMessage"
-        @keydown.shift.enter.exact="handleNewLine"
-        placeholder="メッセージを入力...（Shift+Enterで改行）"
-        rows="1"
-        ref="textareaRef"
-      ></textarea>
+      <textarea v-model="inputText" @keydown.enter.exact.prevent="sendMessage"
+        @keydown.shift.enter.exact="handleNewLine" placeholder="メッセージを入力...（Shift+Enterで改行）" rows="1"
+        ref="textareaRef"></textarea>
       <button @click="sendMessage">送信</button>
     </div>
   </div>
@@ -170,10 +178,12 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 5px;
   outline: none;
-  resize: none; /* ユーザーが手動でサイズ変更できないようにする */
+  resize: none;
+  /* ユーザーが手動でサイズ変更できないようにする */
   font-family: inherit;
   font-size: 14px;
-  max-height: 150px; /* 伸びすぎ防止 */
+  max-height: 150px;
+  /* 伸びすぎ防止 */
 }
 
 button {
