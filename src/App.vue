@@ -61,46 +61,59 @@ const sendMessage = async () => {
 
 const textareaRef = ref(null)
 
-// 文字数に合わせて高さを変える
-watch(inputText, () => {
+watch(messages, async () => {
+  // メッセージが追加されて、DOMが更新されるのを待つ
+  await nextTick()
+
+  if (chatLogRef.value) {
+    chatLogRef.value.scrollTo({
+      top: chatLogRef.value.scrollHeight,
+      behavior: 'smooth'
+    })
+  }
+}, { deep: true })
+
+const handleKeyDown = (e) => {
+  // PCの場合（ShiftなしのEnter）だけ送信
+  // スマホ（タッチデバイス）かどうかを簡易判定
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  if (e.key === 'Enter' && !e.shiftKey && !isMobile) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// メッセージ表示エリアを捕まえるためのリファレンス
+const chatLogRef = ref(null)
+
+// スクロールを一番下にする関数
+const scrollToBottom = () => {
+  console.log('スクロール実行！', chatLogRef.value.scrollHeight)
   nextTick(() => {
-    const el = textareaRef.value
-    if (el) {
-      el.style.height = 'auto'
-      el.style.height = el.scrollHeight + 'px'
+    if (chatLogRef.value) {
+      chatLogRef.value.scrollTo({
+        top: chatLogRef.value.scrollHeight,
+        behavior: 'smooth' // 「シュッ」と滑らかに動かす
+      })
     }
   })
-})
+}
+
+// メッセージの配列(messages)の中身が増えたら、自動で関数を実行する
+watch(messages, () => {
+  scrollToBottom()
+}, { deep: true }) // 配列の中身の変化までしっかり監視する設定
 </script>
-
-<template>
-  <div class="chat-container">
-    <header>AI Chat Bot</header>
-
-    <div class="chat-log">
-      <div v-for="msg in messages" :key="msg.id" :class="['message', msg.isBot ? 'bot' : 'user']">
-        <div class="bubble">{{ msg.text }}</div>
-      </div>
-    </div>
-
-    <div class="input-area">
-      <!-- <input v-model="inputText" @keyup.enter="sendMessage" placeholder="メッセージを入力..." /> -->
-      <textarea v-model="inputText" @keydown.enter.exact.prevent="sendMessage"
-        @keydown.shift.enter.exact="handleNewLine" placeholder="メッセージを入力...（Shift+Enterで改行）" rows="1"
-        ref="textareaRef"></textarea>
-      <button @click="sendMessage">送信</button>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .chat-container {
+  /* 固定の height ではなく、ビューポートの高さ(dvh)を使うとスマホで安定します */
+  height: 100dvh;
   max-width: 500px;
   margin: 0 auto;
-  height: 90vh;
   display: flex;
   flex-direction: column;
-  border: 1px solid #ddd;
   background: #f9f9f9;
 }
 
@@ -115,11 +128,15 @@ header {
 
 .chat-log {
   flex: 1;
+  /* 親のcontainerの中で目一杯広がる */
   overflow-y: auto;
+  /* はみ出た分をスクロール可能にする */
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* 念のため */
+  scroll-behavior: smooth;
 }
 
 .message {
@@ -162,28 +179,141 @@ header {
   border-top: 1px solid #ddd;
 }
 
-/*
-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  outline: none;
-}
-*/
-
 textarea {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 8px;
   outline: none;
   resize: none;
   /* ユーザーが手動でサイズ変更できないようにする */
   font-family: inherit;
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 1.5;
   max-height: 150px;
   /* 伸びすぎ防止 */
+  min-height: 44px;
+  /* 指でタップしやすい高さ */
+}
+
+button {
+  padding: 0 20px;
+  background: #42b983;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
+
+<template>
+  <div class="chat-container">
+    <header>AI Chat Bot</header>
+
+    <div class="chat-log" ref="chatLogRef">
+      <div v-for="msg in messages" :key="msg.id" :class="['message', msg.isBot ? 'bot' : 'user']">
+        <div class="bubble">{{ msg.text }}</div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <textarea v-model="inputText" placeholder="メッセージを入力..." rows="1" ref="textareaRef"></textarea>
+      <button @click="sendMessage">送信</button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.chat-container {
+  /* 固定の height ではなく、ビューポートの高さ(dvh)を使うとスマホで安定します */
+  height: 100dvh;
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #f9f9f9;
+}
+
+header {
+  padding: 15px;
+  background: #42b983;
+  /* Vueカラー */
+  color: white;
+  text-align: center;
+  font-weight: bold;
+}
+
+.chat-log {
+  flex: 1;
+  /* 親のcontainerの中で目一杯広がる */
+  overflow-y: auto;
+  /* はみ出た分をスクロール可能にする */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* 念のため */
+  scroll-behavior: smooth;
+}
+
+.message {
+  display: flex;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.bot {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.4;
+  /* ↓ これを追加：APIから返ってきた改行コード(\n)を有効にする */
+  white-space: pre-wrap; 
+  word-wrap: break-word;
+}
+
+.user .bubble {
+  background: #42b983;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.bot .bubble {
+  background: #eee;
+  color: #333;
+  border-bottom-left-radius: 2px;
+}
+
+.input-area {
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+  background: white;
+  border-top: 1px solid #ddd;
+}
+
+textarea {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  resize: none;
+  /* ユーザーが手動でサイズ変更できないようにする */
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  max-height: 150px;
+  /* 伸びすぎ防止 */
+  min-height: 44px;
+  /* 指でタップしやすい高さ */
 }
 
 button {
