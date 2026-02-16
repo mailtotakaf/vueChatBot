@@ -180,20 +180,24 @@ header {
 }
 
 textarea {
-  flex: 1;
+  display: block;      /* flexの干渉を防ぐ */
+  width: 100%;         /* 横幅はいっぱい */
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
   outline: none;
-  resize: none;
-  /* ユーザーが手動でサイズ変更できないようにする */
+
+  /* --- ここが重要 --- */
+  resize: vertical !important; /* 強制的に上下リサイズを許可 */
+  overflow: auto;              /* スクロールバーも出るように */
+  min-height: 44px;            /* 最小の高さ */
+  height: 60px;               /* 初期の高さ（これがないとつまみが出にくい） */
+  max-height: none;            /* 限界をなくす */
+  /* ------------------ */
+
   font-family: inherit;
   font-size: 16px;
   line-height: 1.5;
-  max-height: 150px;
-  /* 伸びすぎ防止 */
-  min-height: 44px;
-  /* 指でタップしやすい高さ */
 }
 
 button {
