@@ -116,7 +116,7 @@ watch(messages, () => {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  background: #f9f9f9;
+  background: transparent;
 }
 
 header {
@@ -307,105 +307,8 @@ button {
   </div>
 </template>
 
-<style scoped>
-.chat-container {
-  /* 固定の height ではなく、ビューポートの高さ(dvh)を使うとスマホで安定します */
-  height: 100dvh;
-  max-width: 500px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  background: #f9f9f9;
-}
-
-header {
-  padding: 15px;
-  background: #42b983;
-  /* Vueカラー */
-  color: white;
-  text-align: center;
-  font-weight: bold;
-}
-
-.chat-log {
-  flex: 1;
-  /* 親のcontainerの中で目一杯広がる */
-  overflow-y: auto;
-  /* はみ出た分をスクロール可能にする */
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  /* 念のため */
-  scroll-behavior: smooth;
-}
-
-.message {
-  display: flex;
-}
-
-.message.user {
-  justify-content: flex-end;
-}
-
-.message.bot {
-  justify-content: flex-start;
-}
-
-.bubble {
-  max-width: 70%;
-  padding: 10px 15px;
-  border-radius: 15px;
-  font-size: 14px;
-  line-height: 1.4;
-  /* ↓ これを追加：APIから返ってきた改行コード(\n)を有効にする */
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.user .bubble {
-  background: #42b983;
-  color: white;
-  border-bottom-right-radius: 2px;
-}
-
-.bot .bubble {
-  background: #eee;
-  color: #333;
-  border-bottom-left-radius: 2px;
-}
-
-.input-area {
-  padding: 15px;
-  display: flex;
-  gap: 10px;
-  background: white;
-  border-top: 1px solid #ddd;
-}
-
-textarea {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  resize: none;
-  /* ユーザーが手動でサイズ変更できないようにする */
-  font-family: inherit;
-  font-size: 16px;
-  line-height: 1.5;
-  max-height: 150px;
-  /* 伸びすぎ防止 */
-  min-height: 44px;
-  /* 指でタップしやすい高さ */
-}
-
-button {
-  padding: 0 20px;
-  background: #42b983;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+<style>
+body, #app {
+  background: transparent !important;
 }
 </style>

@@ -47,3 +47,12 @@ aws cloudfront create-invalidation \
   --distribution-id 【ディストリビューションID】 \
   --paths "/*"
 ```
+
+================================
+### 別のウェブサイト（HTMLファイル）の <body> 内に貼るタグ
+```
+<iframe src="https://あなたのCloudFrontのURL" 
+        style="position:fixed; bottom:0; right:0; width:400px; height:650px; border:none; z-index:99999; pointer-events:none;" 
+        id="ai-chat-iframe" allowtransparency="true">
+</iframe>
+```
