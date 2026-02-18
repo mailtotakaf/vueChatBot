@@ -1,43 +1,5 @@
 # vueChatBot
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-
 ---
 ## Setup Instructions
 
@@ -61,8 +23,14 @@ Create a file named .env in your project's root folder and add your API key:
 VITE_DIFY_API_KEY=<your_api_key_here>
 ```
 
----
-## スマホ向け起動
+===================================================
+### CloudFormation デプロイ
 ```
-npm run preview -- --host
+aws cloudformation create-stack --stack-name vue-chatbot-infra --template-body file://deploy.yml --capabilities CAPABILITY_IAM
+```
+
+### ファイルのアップロード
+dist フォルダの中身をS3に上げる。
+```
+aws s3 sync dist/ s3://vue-chatbot-infra-hosting-bucket/
 ```
