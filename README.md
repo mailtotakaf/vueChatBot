@@ -28,9 +28,22 @@ VITE_DIFY_API_KEY=<your_api_key_here>
 ```
 aws cloudformation create-stack --stack-name vue-chatbot-infra --template-body file://deploy.yml --capabilities CAPABILITY_IAM
 ```
+===================================================
+
+### ビルド（distフォルダ内に生成される）
+```
+npm run build
+```
 
 ### ファイルのアップロード
 dist フォルダの中身をS3に上げる。
 ```
 aws s3 sync dist/ s3://vue-chatbot-infra-hosting-bucket/
+```
+
+### CloudFrontキャッシュクリア
+```
+aws cloudfront create-invalidation \
+  --distribution-id 【ディストリビューションID】 \
+  --paths "/*"
 ```
