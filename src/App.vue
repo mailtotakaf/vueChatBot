@@ -26,6 +26,13 @@ const sendMessage = async () => {
     isBot: false
   })
   inputText.value = ''
+  
+  // scrollHeight に合わせる
+  nextTick(() => {
+    if (textareaRef.value) {
+      textareaRef.value.style.height = 'auto'
+    }
+  })
 
   // 2. AIの返答
   try {
@@ -75,17 +82,6 @@ watch(messages, async () => {
   }
 }, { deep: true })
 
-const handleKeyDown = (e) => {
-  // PCの場合（ShiftなしのEnter）だけ送信
-  // スマホ（タッチデバイス）かどうかを簡易判定
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
-
-  if (e.key === 'Enter' && !e.shiftKey && !isMobile) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
 // メッセージ表示エリアを捕まえるためのリファレンス
 const chatLogRef = ref(null)
 
@@ -113,6 +109,17 @@ watch(isOpen, (newVal) => {
   // newVal が true なら 'open'、false なら 'close'
   window.parent.postMessage(newVal ? 'open' : 'close', '*');
 });
+
+const autoResize = () => {
+  const el = textareaRef.value
+  if (!el) return
+
+  // 一旦高さをリセット（縮むようにするため）
+  el.style.height = 'auto'
+
+  // scrollHeight に合わせる
+  el.style.height = el.scrollHeight + 'px'
+}
 </script>
 
 <style scoped>
@@ -198,14 +205,13 @@ textarea {
   border-radius: 8px;
   outline: none;
 
-  /* --- ここが重要 --- */
-  resize: vertical !important;
+  /* --- 自動的に高さ調整 --- */
+  resize: none;
   /* 強制的に上下リサイズを許可 */
   overflow: auto;
   /* スクロールバーも出るように */
   min-height: 44px;
-  /* 最小の高さ */
-  height: 60px;
+  overflow: hidden;
   /* 初期の高さ（これがないとつまみが出にくい） */
   max-height: none;
   /* 限界をなくす */
@@ -300,8 +306,8 @@ button {
         </div>
 
         <div class="input-area">
-          <textarea v-model="inputText" @keydown.enter.exact.prevent="sendMessage" placeholder="メッセージを入力..."
-            rows="1"></textarea>
+          <textarea ref="textareaRef" v-model="inputText" @input="autoResize" placeholder="メッセージを入力..." rows="1">
+</textarea>
           <button @click="sendMessage">送信</button>
         </div>
       </div>
