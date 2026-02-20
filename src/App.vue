@@ -3,7 +3,7 @@ import { ref, watch, nextTick } from 'vue'
 import axios from 'axios' // axiosをインポート
 
 // メッセージのリスト（初期データ）
-const messages = ref([{ id: 1, text: '本物のAIに繋がりました！何でも聞いてください。', isBot: true }])
+const messages = ref([{ id: 1, text: 'お問い合わせいただきありがとうございます。', isBot: true }])
 
 // 入力中のテキスト
 const inputText = ref('')
@@ -106,6 +106,13 @@ const scrollToBottom = () => {
 watch(messages, () => {
   scrollToBottom()
 }, { deep: true }) // 配列の中身の変化までしっかり監視する設定
+
+watch(isOpen, (newVal) => {
+  console.log("isOpen changed:", newVal);
+  // 親ウィンドウに対してメッセージを送信
+  // newVal が true なら 'open'、false なら 'close'
+  window.parent.postMessage(newVal ? 'open' : 'close', '*');
+});
 </script>
 
 <style scoped>
@@ -308,7 +315,8 @@ button {
 </template>
 
 <style>
-body, #app {
+body,
+#app {
   background: transparent !important;
 }
 </style>
